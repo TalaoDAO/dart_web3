@@ -24,7 +24,7 @@ dependencies:
   typed_data: ^1.1.6
   stream_channel: ^2.0.0
   stream_transform: ^2.0.0
-  json_rpc_2: ^3.0.0
+  json_rpc_2: ^4.0.0
   collection: ^1.14.11
 
 dev_dependencies:
