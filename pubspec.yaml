@@ -1,6 +1,6 @@
 name: dart_web3
 description: Dart library to connect to Ethereum clients. Send transactions and interact with smart contracts!
-version: 0.0.3
+version: 0.0.4
 homepage: https://github.com/pay-2-bit-human/dart_web3
 
 environment:
@@ -8,18 +8,17 @@ environment:
 
 dependencies:
   # code generation for contracts, shouldn't be imported outside of lib/src/builder/
-  build: ^2.0.0
+  build: ^4.0.4
   build_config: ^1.0.0
-  dart_style: ^2.0.0
+  dart_style: ^3.1.6
   code_builder: ^4.0.0
   path: ^1.8.0
-
   built_collection: ^5.0.0
   pointycastle: ^4.0.0
   convert: ^3.0.0
   meta: ^1.1.0
   http: ^1.3.0
-  js: ^0.6.3
+  js: ^0.7.2
   uuid: ^4.5.1
   typed_data: ^1.1.6
   stream_channel: ^2.0.0
@@ -30,10 +29,10 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^1.0.0
+  flutter_lints: ^6.0.0
   async: ^2.8.2
   build_runner: ^2.0.3
-  build_test: ^2.1.0
-  web_socket_channel: ^2.0.0
+  build_test: ^3.5.7
+  web_socket_channel: ^3.0.3
   test: ^1.9.0
   coverage: ^1.0.1
