@@ -1,8 +1,5 @@
 import 'dart:async';
 
-import 'package:js/js.dart';
-import 'package:js/js_util.dart';
-
 import '../../credentials.dart';
 import '../../json_rpc.dart';
 import 'credentials.dart';

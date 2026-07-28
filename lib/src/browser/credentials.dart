@@ -1,10 +1,8 @@
-@JS()
 library web3dart.internal.js.creds;
 
 import 'dart:typed_data';
 
 import 'package:dart_web3/dart_web3.dart';
-import 'package:js/js.dart';
 
 import '../../crypto.dart';
 import 'dart_wrappers.dart';
@@ -69,8 +67,6 @@ String? _bytesToData(Uint8List? data) {
       : null;
 }
 
-@JS()
-@anonymous
 class _TransactionParameters {
   external String? get gasPrice;
   external String? get gas;
