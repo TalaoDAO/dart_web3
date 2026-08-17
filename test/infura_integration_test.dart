@@ -1,10 +1,10 @@
 @TestOn('vm')
 import 'dart:io';
 
-import 'package:http/http.dart';
-import 'package:test/test.dart';
 import 'package:dart_web3/contracts/erc20.dart';
 import 'package:dart_web3/dart_web3.dart';
+import 'package:http/http.dart';
+import 'package:test/test.dart';
 
 void main() {
   final infuraProjectId = Platform.environment['INFURA_ID'];

@@ -187,7 +187,7 @@ class Web3Client {
       {String blockNumber = 'latest', bool isContainFullObj = true}) {
     return _makeRPCCall<Map<String, dynamic>>(
             'eth_getBlockByNumber', [blockNumber, isContainFullObj])
-        .then((json) => BlockInformation.fromJson(json));
+        .then(BlockInformation.fromJson);
   }
 
   /// Gets the balance of the account with the specified address.
@@ -238,7 +238,7 @@ class Web3Client {
   Future<TransactionInformation> getTransactionByHash(String transactionHash) {
     return _makeRPCCall<Map<String, dynamic>>(
             'eth_getTransactionByHash', [transactionHash])
-        .then((s) => TransactionInformation.fromMap(s));
+        .then(TransactionInformation.fromMap);
   }
 
   /// Returns an receipt of a transaction based on its hash.

@@ -1,7 +1,7 @@
 @TestOn('vm')
 import 'package:build_test/build_test.dart';
-import 'package:test/test.dart';
 import 'package:dart_web3/src/builder/generator.dart';
+import 'package:test/test.dart';
 
 import 'data.dart';
 
