@@ -17,14 +17,16 @@ class ContractGenerator implements Builder {
 
   @override
   Map<String, List<String>> get buildExtensions => const {
-        '.abi.json': ['.g.dart']
-      };
+    '.abi.json': ['.g.dart'],
+  };
 
   @override
   Future<void> build(BuildStep buildStep) async {
     final inputId = buildStep.inputId;
-    final withoutExtension =
-        inputId.path.substring(0, inputId.path.length - '.abi.json'.length);
+    final withoutExtension = inputId.path.substring(
+      0,
+      inputId.path.length - '.abi.json'.length,
+    );
 
     final source = json.decode(await buildStep.readAsString(inputId));
     Documentation? documentation;
@@ -46,7 +48,9 @@ class ContractGenerator implements Builder {
 
     final outputId = AssetId(inputId.package, '$withoutExtension.g.dart');
     await buildStep.writeAsString(
-        outputId, _generateForAbi(abi, abiCode, documentation));
+      outputId,
+      _generateForAbi(abi, abiCode, documentation),
+    );
   }
 
   String _suggestName(String pathWithoutExtension) {
@@ -60,20 +64,25 @@ class ContractGenerator implements Builder {
     final library = generation.generate();
 
     final emitter = DartEmitter(
-        allocator: Allocator.simplePrefixing(), useNullSafetySyntax: true);
+      allocator: Allocator.simplePrefixing(),
+      useNullSafetySyntax: true,
+    );
     final source = '''
 // Generated code, do not modify. Run `build_runner build` to re-generate!
 // @dart=2.12
 ${library.accept(emitter)}''';
 
     try {
-      return DartFormatter(languageVersion: DartFormatter.latestLanguageVersion)
-          .format(source);
+      return DartFormatter(
+        languageVersion: DartFormatter.latestLanguageVersion,
+      ).format(source);
     } on Object {
       // The source couldn't be parsed. Emit it anyways to make debugging the
       // generator easier, but this is likely our fault.
-      log.severe('Could not format generated source. This is likely a bug in '
-          'dart_web3');
+      log.severe(
+        'Could not format generated source. This is likely a bug in '
+        'dart_web3',
+      );
       return source;
     }
   }
@@ -118,11 +127,19 @@ class _ContractGeneration {
   Library generate() {
     return Library((b) {
       b.body
-        ..add(Block((b) => b
-          ..addExpression(contractAbi.newInstanceNamed(
-            'fromJson',
-            [literalString(_abiCode), literalString(_abi.name)],
-          ).assignFinal('_contractAbi'))))
+        ..add(
+          Block(
+            (b) => b
+              ..addExpression(
+                contractAbi
+                    .newInstanceNamed('fromJson', [
+                      literalString(_abiCode),
+                      literalString(_abi.name),
+                    ])
+                    .assignFinal('_contractAbi'),
+              ),
+          ),
+        )
         ..add(Class(_createContractClass))
         ..addAll(_additionalSpecs);
     });
@@ -143,7 +160,7 @@ class _ContractGeneration {
     }
 
     b.methods.addAll([
-      for (final event in _abi.events) Method((b) => _methodForEvent(event, b))
+      for (final event in _abi.events) Method((b) => _methodForEvent(event, b)),
     ]);
 
     final details = documentation?.forContract();
@@ -153,30 +170,38 @@ class _ContractGeneration {
   void _createContractConstructor(ConstructorBuilder b) {
     b
       ..optionalParameters.addAll([
-        Parameter((b) => b
-          ..name = 'address'
-          ..type = ethereumAddress
-          ..named = true
-          ..required = true),
-        Parameter((b) => b
-          ..name = 'client'
-          ..type = web3Client
-          ..named = true
-          ..required = true),
-        Parameter((b) => b
-          ..name = 'chainId'
-          ..type = dartInt.rebuild((b) => b.isNullable = true)
-          ..required = false
-          ..named = true),
+        Parameter(
+          (b) => b
+            ..name = 'address'
+            ..type = ethereumAddress
+            ..named = true
+            ..required = true,
+        ),
+        Parameter(
+          (b) => b
+            ..name = 'client'
+            ..type = web3Client
+            ..named = true
+            ..required = true,
+        ),
+        Parameter(
+          (b) => b
+            ..name = 'chainId'
+            ..type = dartInt.rebuild((b) => b.isNullable = true)
+            ..required = false
+            ..named = true,
+        ),
       ])
-      ..initializers.add(callSuper([
-        deployedContract.newInstance([
-          refer('_contractAbi'),
-          refer('address'),
-        ]),
-        refer('client'),
-        refer('chainId'),
-      ]).code);
+      ..initializers.add(
+        callSuper([
+          deployedContract.newInstance([
+            refer('_contractAbi'),
+            refer('address'),
+          ]),
+          refer('client'),
+          refer('chainId'),
+        ]).code,
+      );
   }
 
   void _methodForFunction(ContractFunction fun, MethodBuilder b, int index) {
@@ -190,23 +215,35 @@ class _ContractGeneration {
       ..requiredParameters.addAll(_parametersFor(fun));
 
     if (!fun.isConstant) {
-      b.optionalParameters.add(Parameter((b) => b
-        ..type = credentials
-        ..name = 'credentials'
-        ..named = true
-        ..required = true));
+      b.optionalParameters.add(
+        Parameter(
+          (b) => b
+            ..type = credentials
+            ..name = 'credentials'
+            ..named = true
+            ..required = true,
+        ),
+      );
     }
 
     if (fun.isConstant) {
-      b.optionalParameters.add(Parameter((b) => b
-        ..name = 'atBlock'
-        ..named = true
-        ..type = blockNum.rebuild((e) => e.isNullable = true)));
+      b.optionalParameters.add(
+        Parameter(
+          (b) => b
+            ..name = 'atBlock'
+            ..named = true
+            ..type = blockNum.rebuild((e) => e.isNullable = true),
+        ),
+      );
     } else {
-      b.optionalParameters.add(Parameter((b) => b
-        ..name = 'transaction'
-        ..named = true
-        ..type = transactionType.rebuild((e) => e.isNullable = true)));
+      b.optionalParameters.add(
+        Parameter(
+          (b) => b
+            ..name = 'transaction'
+            ..named = true
+            ..type = transactionType.rebuild((e) => e.isNullable = true),
+        ),
+      );
     }
 
     final docs = documentation?.forFunction(fun);
@@ -233,26 +270,31 @@ class _ContractGeneration {
   List<Parameter> _parametersFor(ContractFunction function) {
     final parameters = <Parameter>[];
     for (final param in function.parameters) {
-      parameters.add(Parameter((b) => b
-        ..name = _nameOfParameter(param)
-        ..type = param.type.toDart()));
+      parameters.add(
+        Parameter(
+          (b) => b
+            ..name = _nameOfParameter(param)
+            ..type = param.type.toDart(),
+        ),
+      );
     }
 
     return parameters;
   }
 
   Code _bodyForImmutable(ContractFunction function, int index) {
-    final params =
-        function.parameters.map((e) => refer(_nameOfParameter(e))).toList();
+    final params = function.parameters
+        .map((e) => refer(_nameOfParameter(e)))
+        .toList();
 
     final outputs = function.outputs;
     Expression returnValue;
     if (outputs.length > 1) {
       returnValue = _resultClassFor(function).newInstance([refer('response')]);
     } else {
-      returnValue = refer('response')
-          .index(literalNum(0))
-          .castTo(function.outputs.single.type);
+      returnValue = refer(
+        'response',
+      ).index(literalNum(0)).castTo(function.outputs.single.type);
     }
 
     return Block((b) {
@@ -260,10 +302,12 @@ class _ContractGeneration {
 
       b
         ..addExpression(literalList(params).assignFinal('params'))
-        ..addExpression(refer('read')
-            .call([argFunction, argParams, refer('atBlock')])
-            .awaited
-            .assignFinal('response'))
+        ..addExpression(
+          refer('read')
+              .call([argFunction, argParams, refer('atBlock')])
+              .awaited
+              .assignFinal('response'),
+        )
         ..addExpression(returnValue.returned);
     });
   }
@@ -297,8 +341,11 @@ class _ContractGeneration {
     });
   }
 
-  Reference _generateResultClass(List<FunctionParameter> params, String name,
-      {String? docs}) {
+  Reference _generateResultClass(
+    List<FunctionParameter> params,
+    String name, {
+    String? docs,
+  }) {
     final fields = <Field>[];
     final initializers = <Code>[];
     for (var i = 0; i < params.length; i++) {
@@ -308,27 +355,42 @@ class _ContractGeneration {
       final solidityType = params[i].type;
       final type = solidityType.toDart();
 
-      fields.add(Field((b) => b
-        ..name = name
-        ..type = type
-        ..modifier = FieldModifier.final$));
+      fields.add(
+        Field(
+          (b) => b
+            ..name = name
+            ..type = type
+            ..modifier = FieldModifier.final$,
+        ),
+      );
 
       initializers.add(
-          refer(name).assign(refer('response[$i]').castTo(solidityType)).code);
+        refer(name).assign(refer('response[$i]').castTo(solidityType)).code,
+      );
     }
 
-    _additionalSpecs.add(Class((b) {
-      b
-        ..name = name
-        ..fields.addAll(fields)
-        ..constructors.add(Constructor((b) => b
-          ..requiredParameters.add(Parameter((b) => b
-            ..name = 'response'
-            ..type = listify(dynamicType)))
-          ..initializers.addAll(initializers)));
+    _additionalSpecs.add(
+      Class((b) {
+        b
+          ..name = name
+          ..fields.addAll(fields)
+          ..constructors.add(
+            Constructor(
+              (b) => b
+                ..requiredParameters.add(
+                  Parameter(
+                    (b) => b
+                      ..name = 'response'
+                      ..type = listify(dynamicType),
+                  ),
+                )
+                ..initializers.addAll(initializers),
+            ),
+          );
 
-      if (docs != null) b.docs.add(docs);
-    }));
+        if (docs != null) b.docs.add(docs);
+      }),
+    );
 
     return refer(name);
   }
@@ -336,64 +398,98 @@ class _ContractGeneration {
   void _methodForEvent(ContractEvent event, MethodBuilder b) {
     final name = event.name;
     final eventClass = _generateResultClass(
-        event.components.map((e) => e.parameter).toList(), name,
-        docs: documentation?.forEvent(event));
+      event.components.map((e) => e.parameter).toList(),
+      name,
+      docs: documentation?.forEvent(event),
+    );
     final nullableBlockNum = blockNum.rebuild((b) => b.isNullable = true);
 
     final mapper = Method(
       (b) => b
-        ..requiredParameters.add(Parameter((b) => b
-          ..name = 'result'
-          ..type = filterEvent))
+        ..requiredParameters.add(
+          Parameter(
+            (b) => b
+              ..name = 'result'
+              ..type = filterEvent,
+          ),
+        )
         ..body = Block(
           (b) => b
             ..addExpression(
-                refer('event').property('decodeResults').call(const [
-              // todo: Use nullChecked after https://github.com/dart-lang/code_builder/pull/325
-              CodeExpression(Code('result.topics!')),
-              CodeExpression(Code('result.data!')),
-            ]).assignFinal('decoded'))
+              refer('event')
+                  .property('decodeResults')
+                  .call(const [
+                    // TODO(hawkbee): Use nullChecked after https://github.com/dart-lang/code_builder/pull/325
+                    CodeExpression(Code('result.topics!')),
+                    CodeExpression(Code('result.data!')),
+                  ])
+                  .assignFinal('decoded'),
+            )
             ..addExpression(
-                eventClass.newInstance([refer('decoded')]).returned),
+              eventClass.newInstance([refer('decoded')]).returned,
+            ),
         ),
     );
 
     b
       ..returns = streamOf(eventClass)
-      ..docs.add('/// Returns a live stream of all ${eventClass.symbol} '
-          'events emitted by this contract.')
+      ..docs.add(
+        '/// Returns a live stream of all ${eventClass.symbol} '
+        'events emitted by this contract.',
+      )
       ..name = '${name.substring(0, 1).toLowerCase()}${name.substring(1)}Events'
-      ..optionalParameters.add(Parameter((b) => b
-        ..name = 'fromBlock'
-        ..named = true
-        ..type = nullableBlockNum))
-      ..optionalParameters.add(Parameter((b) => b
-        ..name = 'toBlock'
-        ..named = true
-        ..type = nullableBlockNum))
-      ..body = Block((b) => b
-        ..addExpression(_event(event).assignFinal('event'))
-        ..addExpression(filterOptions.newInstanceNamed('events', const [], {
-          'contract': self,
-          'event': refer('event'),
-          'fromBlock': refer('fromBlock'),
-          'toBlock': refer('toBlock'),
-        }).assignFinal('filter'))
-        ..addExpression(client
-            .property('events')
-            .call([refer('filter')])
-            .property('map')
-            .call([mapper.closure])
-            .returned));
+      ..optionalParameters.add(
+        Parameter(
+          (b) => b
+            ..name = 'fromBlock'
+            ..named = true
+            ..type = nullableBlockNum,
+        ),
+      )
+      ..optionalParameters.add(
+        Parameter(
+          (b) => b
+            ..name = 'toBlock'
+            ..named = true
+            ..type = nullableBlockNum,
+        ),
+      )
+      ..body = Block(
+        (b) => b
+          ..addExpression(_event(event).assignFinal('event'))
+          ..addExpression(
+            filterOptions
+                .newInstanceNamed('events', const [], {
+                  'contract': self,
+                  'event': refer('event'),
+                  'fromBlock': refer('fromBlock'),
+                  'toBlock': refer('toBlock'),
+                })
+                .assignFinal('filter'),
+          )
+          ..addExpression(
+            client
+                .property('events')
+                .call([refer('filter')])
+                .property('map')
+                .call([mapper.closure])
+                .returned,
+          ),
+      );
   }
 
   /// Declares a variable named `function` initialized to the [function].
   /// We use an index instead of looking up the name to support overloaded
   /// functions.
   void _assignFunction(
-      ListBuilder<Code> statements, ContractFunction function, int index) {
-    final functionExpr =
-        self.property('abi').property('functions').index(literalNum(index));
+    ListBuilder<Code> statements,
+    ContractFunction function,
+    int index,
+  ) {
+    final functionExpr = self
+        .property('abi')
+        .property('functions')
+        .index(literalNum(index));
 
     statements.add(functionExpr.assignFinal('function').statement);
 
@@ -428,33 +524,26 @@ extension on Expression {
       if (!knownToBeList) result = result.asA(listType);
 
       final inner = type.type;
-      result = result.property('cast').call(
-        const [],
-        const {},
-        [inner.erasedDartType()],
-      );
+      result = result.property('cast').call(const [], const {}, [
+        inner.erasedDartType(),
+      ]);
 
       if (inner is BaseArrayType) {
         // If we have nested list structures, we need to cast the inner ones by
         // using .map((e) => (e as List).cast())
         final m = Method(
           (b) => b
-            ..requiredParameters.add(
-              Parameter((b) => b.name = 'e'),
-            )
+            ..requiredParameters.add(Parameter((b) => b.name = 'e'))
             ..body = Block(
               (b) => b
                 ..addExpression(
-                    refer('e').castTo(inner, knownToBeList: true).returned),
+                  refer('e').castTo(inner, knownToBeList: true).returned,
+                ),
             ),
         );
         result = result
             .property('map')
-            .call(
-              [m.closure],
-              const {},
-              [inner.toDart()],
-            )
+            .call([m.closure], const {}, [inner.toDart()])
             .property('toList')
             .call(const []);
       }
